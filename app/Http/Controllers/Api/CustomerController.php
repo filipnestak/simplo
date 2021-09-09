@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\CustomerRequest;
 use App\Http\Requests\ManageCustomerGroupsRequest;
+use App\Http\Resources\CustomerCollection;
+use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Models\CustomerGroup;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Class CustomerController
@@ -15,11 +18,12 @@ use Illuminate\Http\Request;
 class CustomerController extends Controller
 {
     /**
-     * @return Customer[]|\Illuminate\Database\Eloquent\Collection
+     * @return CustomerCollection
      */
-    public function index($withGroups = false)
+    public function index()
     {
-        return Customer::all();
+        $customers = Customer::paginate();
+        return new CustomerCollection($customers);
     }
 
     /**
@@ -29,9 +33,9 @@ class CustomerController extends Controller
     public function show($id, $withGroups = false)
     {
         if (!$withGroups) {
-            return Customer::findOrFail($id);
+            return new CustomerResource(Customer::findOrFail($id));
         } else {
-            return Customer::with('customerGroups')->findOrFail($id);
+            return new CustomerResource(Customer::with('customerGroups')->findOrFail($id));
         }
     }
 
@@ -41,7 +45,11 @@ class CustomerController extends Controller
      */
     public function store(CustomerRequest $request)
     {
-        return Customer::create($request->validated());
+        $customer = Customer::create($request->validated());
+        return response()->json([
+            'message' => 'success',
+            'data'    => new CustomerResource($customer)
+        ]);
     }
 
     /**
@@ -51,10 +59,12 @@ class CustomerController extends Controller
      */
     public function update(CustomerRequest $request, $id)
     {
-        $article = Customer::findOrFail($id);
-        $article->update($request->validated());
-
-        return $article;
+        $customer = Customer::findOrFail($id);
+        $customer->update($request->validated());
+        return response()->json([
+            'message' => 'success',
+            'data'    => new CustomerResource($customer)
+        ]);
     }
 
     /**
@@ -71,7 +81,7 @@ class CustomerController extends Controller
     /**
      * @param ManageCustomerGroupsRequest $request
      * @param $id
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null
+     * @return \Illuminate\Http\JsonResponse
      */
     public function addCustomerGroup(ManageCustomerGroupsRequest $request, $id)
     {
@@ -82,13 +92,16 @@ class CustomerController extends Controller
         $items = CustomerGroup::whereIn('id', $customerGroups)->get('id')->pluck('id')->toArray();
         $customer->customerGroups()->syncWithoutDetaching($items);
 
-        return Customer::with('customerGroups')->findOrFail($id);
+        return response()->json([
+            'message' => 'success',
+            'data'    => new CustomerResource(Customer::with('customerGroups')->findOrFail($id))
+        ]);
     }
 
     /**
      * @param ManageCustomerGroupsRequest $request
      * @param $id
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null
+     * @return \Illuminate\Http\JsonResponse
      */
     public function removeCustomerGroup(ManageCustomerGroupsRequest $request, $id)
     {
@@ -96,6 +109,9 @@ class CustomerController extends Controller
         $customerGroups = json_decode($request->validated()['customerGroups']);
         $customer->customerGroups()->detach($customerGroups);
 
-        return Customer::with('customerGroups')->findOrFail($id);
+        return response()->json([
+            'message' => 'success',
+            'data'    => new CustomerResource(Customer::with('customerGroups')->findOrFail($id))
+        ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\UserLoginRequest;
 use App\Http\Requests\UserRegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -17,7 +18,7 @@ class AuthController extends Controller
 {
     /**
      * @param UserRegisterRequest $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function register(UserRegisterRequest $request)
     {
@@ -28,16 +29,16 @@ class AuthController extends Controller
             'email'    => $data['email'],
             'password' => Hash::make($data['password'])
         ]);
-
-        return response([
-            'user'  => $user,
-            'token' => $user->createToken('simplo')->plainTextToken
+        return response()->json([
+            'message' => 'success',
+            'user'    => new UserResource($user),
+            'token'   => $user->createToken('simplo')->plainTextToken
         ], 201);
     }
 
     /**
      * @param UserLoginRequest $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function login(UserLoginRequest $request)
     {
@@ -45,14 +46,15 @@ class AuthController extends Controller
         $user = User::where('email', $data['email'])->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
-            return response([
+            return response()->json([
                 'message' => 'Bad creds'
             ], 401);
-        }
 
-        return response([
-            'user'  => $user,
-            'token' => $user->createToken('simplo')->plainTextToken
+        }
+        return response()->json([
+            'message' => 'success',
+            'user'    => new UserResource($user),
+            'token'   => $user->createToken('simplo')->plainTextToken
         ], 201);
     }
 
