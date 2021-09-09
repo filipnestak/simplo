@@ -1,0 +1,33 @@
+/node_modules
+/.idea
+/.vscode
+.DS_Store
+Homestead.yaml
+Homestead.json
+/.vagrant
+.phpunit.result.cache
+
+#Laravel Specific files
+/.htdeployment
+/deploy/master.log
+/deploy/master.ini
+/vendor
+storage/*.key
+/docker/*/data/*
+/docker/web/php/xdebug.ini
+
+/vendor/
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Laravel 4 specific
+bootstrap/compiled.php
+app/storage/
+
+# Laravel 5 & Lumen specific
+public/assets/web/dist
+public/storage
+public/hot
+
+.env

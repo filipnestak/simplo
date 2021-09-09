@@ -1,0 +1,32 @@
+version: '3.5'
+services:
+  db:
+    container_name: db
+    image: mariadb:10.1.48
+    restart: always
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: simplo
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - 3307:3306
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+  web:
+    container_name: web
+    build:
+      context: './web'
+    image: web
+    ports:
+      - 127.0.0.1:80:80
+      - 127.0.0.1:6006:6006
+    links:
+      - db
+    volumes:
+      - ../:/var/www/html
+    depends_on:
+      - db
+
+
