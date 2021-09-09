@@ -17,8 +17,8 @@ class CustomerResource extends JsonResource
         return [
             'id'              => $this->id,
             'first_name'      => $this->first_name,
-            'last_name'       => $this->last_name,
-            'email'           => $this->email,
+            'surname'         => $this->surname,
+            'contact_email'   => $this->contact_email,
             'phone'           => $this->phone,
             'customer_groups' => CustomerGroupResource::collection($this->whenLoaded('customerGroups'))
         ];

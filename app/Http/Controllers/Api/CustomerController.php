@@ -85,7 +85,7 @@ class CustomerController extends Controller
      */
     public function addCustomerGroup(ManageCustomerGroupsRequest $request, $id)
     {
-        $customer = Customer::with('customerGroups')->find($id);
+        $customer = Customer::with('customerGroups')->findOrFail($id);
         $customerGroups = json_decode($request->validated()['customerGroups']);
 
         // Control exist customer groups
